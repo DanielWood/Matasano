@@ -91,8 +91,7 @@ char *base64_decode(char *dest, const char *src)
                     break;
                 else
                 if(++index == 64)
-                    err(1, "Invalid base64 character: '%c' (src[i + k])");
-
+                    err(0, "Invalid base64 character: (%d)", src[i + k]);
             }
 
             int shift = (3 - k) * 6;
