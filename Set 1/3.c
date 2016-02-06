@@ -9,11 +9,6 @@ int score(char *str);
 void hex2bin(char *str, char *dst);
 void str_xor(char *str1, char *str2, char *dst);
 
-/* My solution to:  http://cryptopals.com/sets/1/challenges/3/. *
- * Recursively XORs the ciphertext with every possible byte and *
- * analyzes/scores the results using letter frequency.          *
- * The result with the highest score is assumed to be plaintext,*
- * which in the case of this challenge is the correct answer.   */
 int main (int argc, char *argv[])
 {
 	// Ciphertext

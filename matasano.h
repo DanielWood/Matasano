@@ -1,19 +1,21 @@
 #ifndef __MATASANO_H__
 #define __MATASANO_H__
 
+//#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-//#include <err.h>
+#include <ctype.h>
 #include <assert.h>
+#include <err.h>
 
 // Base-64 encode a string
 char *base64_encode(char *dest, const char *src)
 {
+    assert(src != dest);
+
     static const char charset[64 + 1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef"
                                         "ghijklmnopqrstuvwxyz0123456789+/";
-
-    assert(dest != src);
 
     size_t len = strlen(src);
     size_t padlen = len % 3;
@@ -60,12 +62,13 @@ char *base64_encode(char *dest, const char *src)
 }
 
 // Base64-decode a string
+// Possible to let src == dest?
 char *base64_decode(char *dest, const char *src)
 {
+    assert(src != dest);
+
     static const char charset[64 + 1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef"
                                         "ghijklmnopqrstuvwxyz0123456789+/";
-
-    assert(dest != src);
 
     size_t len = strlen(src);
 
@@ -87,7 +90,8 @@ char *base64_decode(char *dest, const char *src)
 
             // Find charset index
             char *index = strchr(charset, c);
-            assert(index != NULL);
+            if (index == NULL)
+                err(1, "base64_decode: Invalid character '%c' (%d)", c, c);
             index -= (int)charset;
 
             int shift = (3 - k) * 6;
@@ -104,6 +108,63 @@ char *base64_decode(char *dest, const char *src)
 
     // Terminate dest
     dest[j] = '\0';
+
+    return dest;
+}
+
+// Convert a hex string to binary    
+char *hex_to_bin(char *dest, const char *src)
+{
+    //assert(src != dest);
+ 
+    // Strip prefix
+    while ((*src == 'x' && *(src + 1)) || *(src + 1) == 'x')
+        src++;
+
+    size_t len = strlen(src);
+    if (len % 2 != 0)
+        err(1, "hex_to_bin: Source length (%d) must be a multiple of two", len);
+
+    int j = 0;              // Dest increment
+    char buf[3] = "\0\0";   // Nybble buffer
+    
+    // Decode hex
+    for (int i = 0, len = strlen(src); i < len;)
+    {
+        char c = src[i];
+
+        if (!isxdigit(c))
+            err(1, "Invalid hex character '%c' (%d)", c, c);
+
+        buf[i % 2] = c;     // Pack nybbles
+        
+        // Convert buf to single char every 2nd nybble
+        if (++i % 2 == 0)
+            dest[j++] = strtol(buf, NULL, 16);
+    }
+    
+    dest[j] = '\0';
+
+    return dest;
+}
+
+// Convert a binary string to hex
+char *bin_to_hex(char *dest, const char *src, size_t size)
+{
+    assert(src != dest);
+
+    // Convert to bytes nybble string
+    for (int i = 0, j = 0; i < size; i++, j += 2)
+        snprintf(&dest[j], 2 + 1, "%02x", src[i]);
+
+    return dest;
+}
+
+// XOR's the first <size> bytes of a and b, storing the result in dest
+char *str_xor(char *dest, const char *a, const char *b, size_t size)
+{
+    for (int i = 0; i < size; i++) 
+       dest[i] = a[i] ^ b[i];
 
     return dest;
 }
