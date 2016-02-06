@@ -1,7 +1,6 @@
 #ifndef __MATASANO_H__
 #define __MATASANO_H__
 
-#include <stdio.h> // REMOVEME
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -90,8 +89,8 @@ char *base64_decode(char *dest, const char *src)
                 if (charset[index] == src[i + k])
                     break;
                 else
-                if(++index == 64)
-                    err(0, "Invalid base64 character: (%d)", src[i + k]);
+                if(index++ == 64)
+                    err(1, "Invalid base64 character: (%d)", src[i + k]);
             }
 
             int shift = (3 - k) * 6;
