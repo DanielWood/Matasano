@@ -105,6 +105,9 @@ char *base64_decode(char *dest, const char *src)
         }
     }
 
+    // Terminate dest
+    dest[j] = '\0';
+
     return dest;
 }
 
