@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <err.h>
+//#include <err.h>
+#include <assert.h>
 
 // Base-64 encode a string
 char *base64_encode(char *dest, const char *src)
@@ -12,8 +13,7 @@ char *base64_encode(char *dest, const char *src)
     static const char charset[64 + 1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef"
                                         "ghijklmnopqrstuvwxyz0123456789+/";
 
-    if (dest == src)
-        err(1, "Destination and source cannot be same address (%p)", src);
+    assert(dest != src);
 
     size_t len = strlen(src);
     size_t padlen = len % 3;
@@ -65,8 +65,7 @@ char *base64_decode(char *dest, const char *src)
     static const char charset[64 + 1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef"
                                         "ghijklmnopqrstuvwxyz0123456789+/";
 
-    if (dest == src)
-        err(1, "Destination and source cannot be same address (%p)", src);
+    assert(dest != src);
 
     size_t len = strlen(src);
 
@@ -75,26 +74,24 @@ char *base64_decode(char *dest, const char *src)
 
     // Decode string
     int32_t word;
-    for (i = 0, j = 0; i < len && src[i] != '='; i += 4, j += 3)
+    for (i = 0, j = 0; i < len; i += 4, j += 3)
     {
         word = 0;
 
         // Pack four 6-bit ints into dword
         for (int k = 0; k < 4; k++)
         {
+            char c = src[i + k];
+            if (c == '\0' || c == '=')
+                break;
+
             // Find charset index
-            int index = 0;
-            while (index < 64)
-            {
-                if (charset[index] == src[i + k])
-                    break;
-                else
-                if(index++ == 64)
-                    err(1, "Invalid base64 character: (%d)", src[i + k]);
-            }
+            char *index = strchr(charset, c);
+            assert(index != NULL);
+            index -= (int)charset;
 
             int shift = (3 - k) * 6;
-            word |= (int32_t)(index & 0x3f) << shift;
+            word |= ((int32_t)(index) & 0x3f) << shift;
         }
 
         // Unpack three bytes from dword
