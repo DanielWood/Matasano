@@ -14,6 +14,9 @@ int main(void)
     char *xorplain = "xor test";
     char *xorkey = "ABCDEFGH";
 
+    char *hanning_a = "this is a test";
+    char *hanning_b = "wokka wokka!!!";
+
     char buf[128];
     
     // Base64 unit test
@@ -27,6 +30,9 @@ int main(void)
     // XOR unit test
     size_t xorlen = strlen(xorplain);
     assert(strcmp(xorplain, str_xor(buf, str_xor(buf, xorplain, xorkey, xorlen), xorkey, xorlen)) == 0);
+
+    // Hanning distance test
+    assert(edit_dist(hanning_a, hanning_b) == 37);
 
     printf("All tests completed successfully!\n"); 
     return 0;

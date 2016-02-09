@@ -169,4 +169,17 @@ char *str_xor(char *dest, const char *a, const char *b, size_t size)
     return dest;
 }
 
+// Computes the edit/hanning distance between two strings
+int edit_dist(const char *a, const char *b)
+{
+    int dist = 0;
+    for (int i = 0; a[i] && b[i]; i++)
+    {
+        char c = a[i] ^ b[i];
+        for (int j = 0; j < 8; j++)
+            dist += (c >> j) & 1;
+    }
+
+    return dist;
+}
 #endif
